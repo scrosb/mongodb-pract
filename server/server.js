@@ -30,3 +30,6 @@ let port = 3000;
 app.listen(port, () => {
     console.log(`Started on: ${port}`);
 })
+
+//export app for testing
+module.exports = {app};
