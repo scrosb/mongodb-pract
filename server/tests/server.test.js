@@ -17,9 +17,6 @@ beforeEach((done) => {
 });
 
 
-
-
-
 describe('POST /todos', () => {
     //done for async tests
     it('should create a new todo', (done) => {
