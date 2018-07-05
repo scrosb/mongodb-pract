@@ -1,11 +1,17 @@
 const expect = require('expect');
 const request = require('supertest');
-
+const {ObjectID} = require('mongodb');
 const {app} = require('./../server');
 const {Todo} =  require('./../models/todo');
 
 
-const todos = [{text:'Walk the dog'} , {text: 'second test todo'}];
+const todos = [{
+    _id:new ObjectID,
+    text:'Walk the dog'
+} , {
+    _id:new ObjectID, 
+    text: 'second test todo'
+}];
 
 //before each sets up test code to make sure the database is empty
 beforeEach((done) => {
@@ -72,5 +78,34 @@ describe('Get /todos', () => {
             .end(done);
             //no need to provide a function to end, since not doing anything asynchronous
 
-    })
-})
+    });
+});
+
+describe('Get /todos/:id', () => {
+    it('should return todo doc', (done) => {
+        //to hex string converts object id to a string
+        request(app)
+            .get(`/todos/${todos[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(todos[0].text)
+            })
+            .end(done);
+    });
+
+    it('should return 404 if todo not found', (done) => {
+        const samid = new ObjectID().toHexString();
+
+        request(app)
+            .get(`/todos/${samid}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('should return 404 if todo not found', (done) => {
+        request(app)
+            .get(`/todos/abc123`)
+            .expect(404)
+            .end(done);
+    });
+});
