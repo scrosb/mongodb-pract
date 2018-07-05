@@ -5,10 +5,20 @@ const {app} = require('./../server');
 const {Todo} =  require('./../models/todo');
 
 
+const todos = [{text:'Walk the dog'} , {text: 'second test todo'}];
+
 //before each sets up test code to make sure the database is empty
 beforeEach((done) => {
-    Todo.remove({}).then(() => done());
+    Todo.remove({}).then(() => {
+      return  Todo.insertMany(todos);
+    }).then(() => {
+        done();
+    })
 });
+
+
+
+
 
 describe('POST /todos', () => {
     //done for async tests
@@ -27,7 +37,7 @@ describe('POST /todos', () => {
                 return done(err);
             }
 
-            Todo.find().then((todos) => {
+            Todo.find({text}).then((todos) => {
                 expect(todos.length).toBe(1);
                 expect(todos[0].text).toBe(text);
                 done();
@@ -46,10 +56,24 @@ describe('POST /todos', () => {
                     return done(err);
                 }
                 Todo.find().then((todos) => {
-                    expect(todos.length).toBe(0);
+                    expect(todos.length).toBe(2);
                     done();
                 }).catch((e) => done(e));
             })
     });
 
 });
+
+describe('Get /todos', () => {
+    it('should get all todos', (done) => {
+        request(app)
+            .get('/todos')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todos.length).toBe(2);
+            })
+            .end(done);
+            //no need to provide a function to end, since not doing anything asynchronous
+
+    })
+})
